@@ -15,6 +15,10 @@ This is a minimal Zsh configuration aimed at users who want a clean, fast, and e
 - **Homebrew**: A package manager for macOS (or Linux). It's used here to install `zsh-syntax-highlighting` easily.
 - **zsh-syntax-highlighting**: A plugin that adds syntax highlighting to Zsh.
 
+## Theme (RobbyRussel like) 
+<img width="743" alt="macadamia-theme" src="https://github.com/user-attachments/assets/819dce45-40e4-4728-92d7-ff4b118b4e8c" />
+
+
 ## Installation
 
 #### Install Homebrew (if not installed already)
