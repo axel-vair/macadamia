@@ -1,0 +1,72 @@
+# Macadamia
+# By Axel Vair
+# https://github.com/axel-vair/macadamia
+
+# Activation de l'autocomplétion et de la coloration syntaxique
+autocompletion_enabled=true
+source $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Chargement des fonctions nécessaires pour Git
+autoload -Uz vcs_info
+
+# Fonction pour afficher l'état de Git
+git_prompt_info() {
+  # Vérifie si nous sommes dans un dépôt Git
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    # Récupère le nom de la branche actuelle
+    local git_branch="$(git rev-parse --abbrev-ref HEAD)"
+    local status_symbol=""
+
+    # Vérifie l'état du dépôt (commits en attente, fichiers modifiés)
+    local git_status=$(git status --porcelain)
+
+    # Si le dépôt a des modifications (commits non poussés, fichiers modifiés)
+    if [[ -n "$git_status" ]]; then
+      status_symbol="%{$fg_bold[red]%}✗%{$reset_color%}"  # Dépôt sale
+    else
+      status_symbol="%{$fg_bold[green]%}✓%{$reset_color%}"  # Dépôt propre
+    fi
+
+    # Retourne la branche et le statut avec des couleurs appropriées
+    echo "%{$fg_bold[red]%}${git_branch}%{$reset_color%} ${status_symbol}"
+  fi
+}
+
+# Active la coloration de ls
+alias ls='ls -G'    # Utilisation de l'option -G pour activer la couleur
+
+# Personnalisation de la couleur des dossiers pour avoir des dossiers en cyan
+export LSCOLORS=GxFxCxDxBxegedabagaced
+
+# Fonction pour configurer le prompt principal
+prompt_macadamia_setup() {
+    PROMPT="%{$fg_bold[cyan]%}%1~%{$reset_color%}"  # Affichage du chemin actuel (nom du dossier courant)
+
+    # Récupérer l'état Git si dans un dépôt
+    local git_info="$(git_prompt_info)"
+
+    # Ajoute l'info Git au prompt si nous sommes dans un dépôt Git
+    if [[ -n "$git_info" ]]; then
+      PROMPT+=" %{$fg_bold[blue]%}git:($git_info)%{$reset_color%}"
+    fi
+
+    # Indicateur de statut de commande
+    PROMPT+=' %(?.%{$fg[green]%}❯%{$reset_color%}.%{$fg[red]%}❯%{$reset_color%}) '
+}
+
+# Initialisation des couleurs et des styles
+autoload -U colors && colors  # Chargement des couleurs dans zsh
+setopt prompt_subst  # Permet l'utilisation de substitution de prompt
+
+# Assurer que vcs_info est appelé pour mettre à jour les informations Git
+# Cette fonction s'assure que vcs_info se déclenche après chaque changement de répertoire
+chpwd() {
+  vcs_info  # Met à jour les informations de Git lorsque le répertoire change
+  prompt_macadamia_setup  # Met à jour le prompt après le changement de répertoire
+}
+
+# Force la mise à jour de l'état Git avant chaque commande
+precmd() {
+  prompt_macadamia_setup  # Met à jour le prompt avant chaque commande
+}
+
